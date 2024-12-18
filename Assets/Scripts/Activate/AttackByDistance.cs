@@ -1,27 +1,23 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackByDistance : MonoBehaviour
 {
-    [SerializeField] private float DistanceToAttack = 8f;
-    private bool isActiveToAttack = true;
-    private Activator activator;
+    [SerializeField] private EnemyActivator _enemyActivator;
+    [SerializeField] private float _distanceToAttack = 8f;
+    private bool _isActiveToAttack = true;
 
     private void Start()
     {
-        activator = FindObjectOfType<Activator>();
-        activator.ObjectsToAttack.Add(this);
+        _enemyActivator.AddEnemyToAttackByDistance(this);
     }
-    
+
     public void CheckDistance(Vector3 playerPosition)
     {
         float distance = Vector3.Distance(transform.position, playerPosition);
 
-        if (isActiveToAttack)
+        if (_isActiveToAttack)
         {
-            if (distance > DistanceToAttack)
+            if (distance > _distanceToAttack)
             {
                 Deactivate();
             }
@@ -29,23 +25,21 @@ public class AttackByDistance : MonoBehaviour
 
         else
         {
-            if (distance < DistanceToAttack)
+            if (distance < _distanceToAttack)
             {
                 Activate();
             }
         }
-
-
     }
-    public void Activate()
+    private void Activate()
     {
-        isActiveToAttack = true;
+        _isActiveToAttack = true;
         gameObject.GetComponent<Enemy>().enabled = true;
     }
 
-    public void Deactivate()
+    private void Deactivate()
     {
-        isActiveToAttack = false;
+        _isActiveToAttack = false;
         gameObject.GetComponent<Enemy>().enabled = false;
     }
 

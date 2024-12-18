@@ -1,41 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-
-public enum States
-{
-    idle,
-    run,
-    jump
-}
 public class MoveControl : MonoBehaviour
 {
-    //[SerializeField] private Transform playerTransform;
-    [SerializeField] private Rigidbody2D rigidbody;
-    [SerializeField] private SpriteRenderer sprite;
-    [SerializeField] private Animator animator;
+    private static readonly string idle = "player_idle";
+    private static readonly string run = "player_run";
+    private static readonly string jump = "player_jump";
 
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private bool isGrounded;
+    [SerializeField] private Rigidbody2D _rigidbody;
+    [SerializeField] private SpriteRenderer _sprite;
+    [SerializeField] private Animator _animator;
 
-    private States State
-    {
-        get { return (States)animator.GetInteger("state"); }
-        set { animator.SetInteger("state", (int)value); }
-    }
+    [SerializeField] private float _moveSpeed;
+    [SerializeField] private float _jumpForce;
+    [SerializeField] private bool _isGrounded;
+
+    
     
     private void Update()
     {
-        if (isGrounded)
+        if (_isGrounded)
         {
-            State = States.idle;
+            _animator.Play(idle);
         }
 
-        if (!isGrounded)
+        if (!_isGrounded)
         {
-            State = States.jump;
+            _animator.Play(jump);
         }
 
         if (Input.GetButton("Horizontal"))
@@ -51,27 +41,24 @@ public class MoveControl : MonoBehaviour
 
     private void Move()
     {
-        if (isGrounded)
+        if (_isGrounded)
         {
-            State = States.run;
+            _animator.Play(run);
+            //State = States.run;
         }
 
         Vector3 direction = transform.right * Input.GetAxis("Horizontal");
-        transform.position = Vector3.MoveTowards(transform.position, transform.position + direction, Time.deltaTime * moveSpeed);
+        transform.position = Vector3.MoveTowards(transform.position, transform.position + direction, Time.deltaTime * _moveSpeed);
 
-        sprite.flipX = direction.x < 0f;
-
-
+        _sprite.flipX = direction.x < 0f;
     }
 
     public void Jump()
     { 
-        if (isGrounded)
+        if (_isGrounded)
         {
-            rigidbody.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+            _rigidbody.AddForce(transform.up * _jumpForce, ForceMode2D.Impulse);
         }
-
-        
     }
        
     private void OnCollisionStay2D(Collision2D collision)
@@ -79,13 +66,13 @@ public class MoveControl : MonoBehaviour
         float angle = Vector3.Angle(collision.contacts[0].normal, Vector3.up);
         if (angle < 45f)
         {
-            isGrounded = true;
+            _isGrounded = true;
         }
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    private void OnCollisionExit2D()
     {
-        isGrounded = false;
+        _isGrounded = false;
     }
 
 }

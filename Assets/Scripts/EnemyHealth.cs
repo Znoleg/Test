@@ -2,14 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyHealth : MonoBehaviour
+public class EnemyHealth : MonoBehaviour, IHaveHealth
 {
-    [SerializeField] private int health;
+    [SerializeField] private Enemy _enemy;
+    [SerializeField] private int _health;
 
     public void TakeDamage(int damageValue)
     {
-        health -= damageValue;
-        if(health <= 0)
+        _health -= damageValue;
+        if(_health <= 0)
         {
             DestroyEnemy();
         }
@@ -17,6 +18,6 @@ public class EnemyHealth : MonoBehaviour
 
     private void DestroyEnemy()
     {
-        Destroy(gameObject);  
+        Destroy(_enemy);  
     }
 }

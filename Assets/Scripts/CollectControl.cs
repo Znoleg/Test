@@ -8,12 +8,10 @@ public class CollectControl : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Coin coin = collision.gameObject.GetComponent<Coin>();
-
-        if (coin)
+        if (collision.gameObject.TryGetComponent(out Coin coin))
         {
             score.AddOne();
-            coin.DestroyCoin();
+            coin.Destroy();
         }
     }
 }

@@ -9,6 +9,8 @@ public class Score : MonoBehaviour
     //[SerializeField] private TextMeshPro coinsText;
     [SerializeField] private TextMeshProUGUI coinsText;
 
+    public int Coins { get; private set; }
+
     public void AddOne()
     {
         coins++;

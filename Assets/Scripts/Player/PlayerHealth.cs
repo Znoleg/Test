@@ -2,24 +2,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : MonoBehaviour, IHaveHealth
 {
-    [SerializeField] private int health;
-    [SerializeField] private int maxHealth;
+    [SerializeField] private int _health;
+    [SerializeField] private int _maxHealth;
+
+    [SerializeField] private HealthBar _healthBar;
+    
     private bool invulnerable = false;
+
+    private void Start()
+    {
+        _health = _maxHealth;
+        _healthBar.SetMaxHealth(_maxHealth);
+    }
+
     public void TakeDamage(int damageValue)
     {
-        if(invulnerable == false)
+        int oldHealth = _health;
+
+        if (invulnerable == false)
         {
-            health -= damageValue;
-            if (health < 0)
+            _health -= damageValue;
+            if (_health < 0)
             {
-                health = 0;
+                _health = 0;
                 Rip();
             }
             invulnerable = true;
             Invoke("StopInvulnerable", 1f);
         }
+        int newHealth = _health;
+
+        // _healthBar.SetHealth(_health);
+
+        _healthBar.SetHealthMoveTowards(oldHealth, newHealth);
     }
 
     private void StopInvulnerable()
@@ -29,15 +46,19 @@ public class PlayerHealth : MonoBehaviour
 
     public void AddHealth(int healthValue)
     {
-        health += healthValue;
-        if(health > maxHealth)
+        _health += healthValue;
+        if(_health > _maxHealth)
         {
-            health = maxHealth;
+            _health = _maxHealth;
         }
+
+        _healthBar.SetHealth(_health);
     }
 
     private void Rip()
     {
         Debug.Log("R.I.P");
     }
+
+   
 }

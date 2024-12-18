@@ -1,15 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class LootHeal : MonoBehaviour
+public class LootHeal : MonoBehaviour, IPickup
 {
     [SerializeField] private int healthValue = 1;
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        PlayerHealth playerHealth = collision.attachedRigidbody.GetComponent<PlayerHealth>();
 
-        if(playerHealth)
+    public void Pick(Pickuper pickup)
+    {
+        PlayerHealth playerHealth = pickup.transform.GetComponent<PlayerHealth>();
+
+        if (playerHealth)
         {
             playerHealth.AddHealth(healthValue);
             Destroy(gameObject);

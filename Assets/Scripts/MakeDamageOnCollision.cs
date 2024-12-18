@@ -4,17 +4,14 @@ using UnityEngine;
 
 public class MakeDamageOnCollision : MonoBehaviour
 {
-    [SerializeField] private int damageValue = 1;
+    [SerializeField] private int damageValue = 10;
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        PlayerHealth playerHealth = collision.rigidbody.GetComponent<PlayerHealth>();
+        IHaveHealth objectHealth = collision.transform.GetComponent<IHaveHealth>();
 
         if (collision.rigidbody)
-        {
-            if (playerHealth)
-            {
-                playerHealth.TakeDamage(damageValue);
-            }
+        { 
+                objectHealth.TakeDamage(damageValue);
         }
     }
 }

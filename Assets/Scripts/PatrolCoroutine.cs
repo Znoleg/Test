@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
+//Юзинги чистим, комментарии не оставляем.
+
+//Никакая это не корутина, подумай лучше над названием. 
 public class PatrolCoroutine : MonoBehaviour
 {
     [SerializeField] private Transform leftTarget;

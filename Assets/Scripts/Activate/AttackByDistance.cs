@@ -11,6 +11,10 @@ public class AttackByDistance : MonoBehaviour
         _enemyActivator.AddEnemyToAttackByDistance(this);
     }
 
+    //По сути полное дублирование метода из ActivateByDistance. Подумать, как решить без дублирования. 
+    //Кроме того, нечитаемая сигнатура метода. Когда я вижу название CheckDistance, я ожидаю только проверку дистанции.
+    //А под капотом у этого метода заложена еще какая-то логика с активированием. 
+    //Ну и само название подразумевает возвращение некоего значения дистанции, а не void
     public void CheckDistance(Vector3 playerPosition)
     {
         float distance = Vector3.Distance(transform.position, playerPosition);

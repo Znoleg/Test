@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//У тебя с компонентом ActivateByDistance и AttackByDistance получается циклическая зависимость.
+//То есть у тебя EnemyActivator ссылается на ActivateByDistance и AttackByDistance, а ActivateByDistance и AttackByDistance ссылается на EnemyActivator.
+//Как минимум, это надо убирать Вообще правило на всю жизнь: чем меньше класс знает о ком то, тем лучше 
 public class EnemyActivator : MonoBehaviour
 {
     [SerializeField] private Transform _playerTransform;
@@ -45,5 +48,5 @@ public class EnemyActivator : MonoBehaviour
 
 
 
-    // ����� �������� ����� CheckDistance, �.� � ActivateByDistance ����� Deactivate() ��������� ������ � ������ ��������� ��������
+    // ����� �������� ����� CheckDistance, �.� � ActivateByDistance ����� Deactivate() ��������� ������ � ������ ��������� ��������
 }

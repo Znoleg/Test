@@ -1,5 +1,6 @@
 using UnityEngine;
 
+//Комментарии убираемю
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private Transform _player;
@@ -14,6 +15,7 @@ public class Enemy : MonoBehaviour
         //playerTransform = FindObjectOfType<Player>().transform;
     }
 
+    //Метод нигде не вызывается, убрать его
     public void Init(Transform playerTransform)
     {
         _player = playerTransform;

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Комментарии убираем, юзинги чистим. С отступами и пропусками строк тоже поработать
 public class Creator : MonoBehaviour
 {
     
@@ -15,6 +16,7 @@ public class Creator : MonoBehaviour
     //[SerializeField] private Score _score;
     private Transform _playerTransform;
 
+    //Раз уж назначил -3, то убери [SerializeField] 
     [SerializeField] private int _yPosition = -3;
     private int[] _xCoords = { 5,6,7,14,15 };
 

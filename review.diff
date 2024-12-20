@@ -1,0 +1,490 @@
+ Assets/Scripts/Activate/ActivateByDistance.cs | 13 +++++++++++--
+ Assets/Scripts/Activate/AttackByDistance.cs   |  4 ++++
+ Assets/Scripts/Activate/EnemyActivator.cs     |  5 ++++-
+ Assets/Scripts/Coin.cs                        |  1 +
+ Assets/Scripts/CollectControl.cs              |  2 ++
+ Assets/Scripts/Creator.cs                     |  2 ++
+ Assets/Scripts/Damager.cs                     |  2 ++
+ Assets/Scripts/Enemy.cs                       |  2 ++
+ Assets/Scripts/EnemyHealth.cs                 |  1 +
+ Assets/Scripts/FollowTarget.cs                |  5 +++++
+ Assets/Scripts/IHaveHealth.cs                 |  1 +
+ Assets/Scripts/IPickup.cs                     |  1 +
+ Assets/Scripts/LootHeal.cs                    |  3 +++
+ Assets/Scripts/MakeDamageOnCollision.cs       |  3 +++
+ Assets/Scripts/MoveControl.cs                 |  2 ++
+ Assets/Scripts/Patrol.cs                      |  6 +++++-
+ Assets/Scripts/PatrolCoroutine.cs             |  3 +++
+ Assets/Scripts/Pickuper.cs                    |  1 +
+ Assets/Scripts/Player/Player.cs               |  2 ++
+ Assets/Scripts/Player/PlayerHealth.cs         |  5 +++++
+ Assets/Scripts/Score.cs                       |  2 ++
+ Assets/Scripts/TakeDamageOnCollision.cs       |  3 +++
+ Assets/Scripts/UI/HealthBar.cs                |  3 +++
+ Assets/Scripts/UI/MainMenu.cs                 |  3 ++-
+ 24 files changed, 70 insertions(+), 5 deletions(-)
+
+diff --git a/Assets/Scripts/Activate/ActivateByDistance.cs b/Assets/Scripts/Activate/ActivateByDistance.cs
+index e8fa627..1f04816 100644
+--- a/Assets/Scripts/Activate/ActivateByDistance.cs
++++ b/Assets/Scripts/Activate/ActivateByDistance.cs
+@@ -1,5 +1,8 @@
+ using UnityEngine;
+ 
++//Следить за отступами в коде, сохраняя единую консистентность. А то в одном месте нет отступа, в другом 2, в третьем 1
++//Оставлять любые комментарии - харам в 99 процентах случаев. Чтобы что-то вернуть как было, используй гит. Он как раз для этого
++//НИКОГДА не называть классы глаголом, ТОЛЬКО существительным
+ public class ActivateByDistance : MonoBehaviour
+ {
+     [SerializeField] private EnemyActivator _enemyActivator;
+@@ -9,7 +12,7 @@ public class ActivateByDistance : MonoBehaviour
+ 
+     private void Start()
+     {
+-        // ������� ������� � List � ����������
++        // ������� ������� � List � ����������
+ 
+         //_enemyActivator = FindObjectOfType<EnemyActivator>();
+ 
+@@ -18,11 +21,14 @@ public class ActivateByDistance : MonoBehaviour
+     
+     public void CheckDistance(Vector3 playerPosition)
+     {
++        //Лучше на активирование сразу проверять, иначе у тебя расстояние может впустую посчитаться, и потом ничего не произойдет
++        //Экономим ресурсы машины таким образом.
+         float distance = Vector3.Distance(transform.position, playerPosition);
+ 
+         if (_isActive)
+         {
+-            if (distance > _distanceToActivate + 2f) // �������� enemy ����� ������ ������ _distanceToActivate, ����� �������� ������������� ��������� �������
++            //Магических чисел избегаем. Вынеси двойку в сериализуемое поле вверху класса
++            if (distance > _distanceToActivate + 2f) // �������� enemy ����� ������ ������ _distanceToActivate, ����� �������� ������������� ��������� �������
+             {
+                 Deactivate();
+             } 
+@@ -36,6 +42,9 @@ public class ActivateByDistance : MonoBehaviour
+             }
+         }
+     }
++    
++    //Подумать, как избавиться от методов активирования и деактивирования. У монобехов и без того есть SetActive, который
++    //можно вызывать в любом месте. 
+     private void Activate()
+     {
+         _isActive = true;
+diff --git a/Assets/Scripts/Activate/AttackByDistance.cs b/Assets/Scripts/Activate/AttackByDistance.cs
+index adbb9dc..7192087 100644
+--- a/Assets/Scripts/Activate/AttackByDistance.cs
++++ b/Assets/Scripts/Activate/AttackByDistance.cs
+@@ -11,6 +11,10 @@ public class AttackByDistance : MonoBehaviour
+         _enemyActivator.AddEnemyToAttackByDistance(this);
+     }
+ 
++    //По сути полное дублирование метода из ActivateByDistance. Подумать, как решить без дублирования. 
++    //Кроме того, нечитаемая сигнатура метода. Когда я вижу название CheckDistance, я ожидаю только проверку дистанции.
++    //А под капотом у этого метода заложена еще какая-то логика с активированием. 
++    //Ну и само название подразумевает возвращение некоего значения дистанции, а не void
+     public void CheckDistance(Vector3 playerPosition)
+     {
+         float distance = Vector3.Distance(transform.position, playerPosition);
+diff --git a/Assets/Scripts/Activate/EnemyActivator.cs b/Assets/Scripts/Activate/EnemyActivator.cs
+index 3afa500..b6f4ea8 100644
+--- a/Assets/Scripts/Activate/EnemyActivator.cs
++++ b/Assets/Scripts/Activate/EnemyActivator.cs
+@@ -1,6 +1,9 @@
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//У тебя с компонентом ActivateByDistance и AttackByDistance получается циклическая зависимость.
++//То есть у тебя EnemyActivator ссылается на ActivateByDistance и AttackByDistance, а ActivateByDistance и AttackByDistance ссылается на EnemyActivator.
++//Как минимум, это надо убирать Вообще правило на всю жизнь: чем меньше класс знает о ком то, тем лучше 
+ public class EnemyActivator : MonoBehaviour
+ {
+     [SerializeField] private Transform _playerTransform;
+@@ -45,5 +48,5 @@ public class EnemyActivator : MonoBehaviour
+ 
+ 
+ 
+-    // ����� �������� ����� CheckDistance, �.� � ActivateByDistance ����� Deactivate() ��������� ������ � ������ ��������� ��������
++    // ����� �������� ����� CheckDistance, �.� � ActivateByDistance ����� Deactivate() ��������� ������ � ������ ��������� ��������
+ }
+diff --git a/Assets/Scripts/Coin.cs b/Assets/Scripts/Coin.cs
+index 308120e..0d0f3de 100644
+--- a/Assets/Scripts/Coin.cs
++++ b/Assets/Scripts/Coin.cs
+@@ -2,6 +2,7 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим. Лучше переназвать класс в условный CoinsDestroyer, если ты хочешь именно тут спрятать логику уничтожения монетки
+ public class Coin : MonoBehaviour
+ {
+     public void Destroy()
+diff --git a/Assets/Scripts/CollectControl.cs b/Assets/Scripts/CollectControl.cs
+index 31f4f95..950e6ab 100644
+--- a/Assets/Scripts/CollectControl.cs
++++ b/Assets/Scripts/CollectControl.cs
+@@ -2,12 +2,14 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Чистим юзинги. 
+ public class CollectControl : MonoBehaviour
+ {
+     [SerializeField] private Score score;
+ 
+     private void OnTriggerEnter2D(Collider2D collision)
+     {
++        //gameObject не нужен, можно делать сразу collision.TryGetComponent(out Coin coin) 
+         if (collision.gameObject.TryGetComponent(out Coin coin))
+         {
+             score.AddOne();
+diff --git a/Assets/Scripts/Creator.cs b/Assets/Scripts/Creator.cs
+index 186fa14..006254d 100644
+--- a/Assets/Scripts/Creator.cs
++++ b/Assets/Scripts/Creator.cs
+@@ -3,6 +3,7 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Комментарии убираем, юзинги чистим. С отступами и пропусками строк тоже поработать
+ public class Creator : MonoBehaviour
+ {
+     
+@@ -15,6 +16,7 @@ public class Creator : MonoBehaviour
+     //[SerializeField] private Score _score;
+     private Transform _playerTransform;
+ 
++    //Раз уж назначил -3, то убери [SerializeField] 
+     [SerializeField] private int _yPosition = -3;
+     private int[] _xCoords = { 5,6,7,14,15 };
+ 
+diff --git a/Assets/Scripts/Damager.cs b/Assets/Scripts/Damager.cs
+index 54b3b58..2171d93 100644
+--- a/Assets/Scripts/Damager.cs
++++ b/Assets/Scripts/Damager.cs
+@@ -2,6 +2,8 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++
++//Юзинги чистим. Если класс ничего не делает, то он и не нужен
+ public class Damager : MonoBehaviour
+ {
+     private void OnTriggerEnter2D(Collider2D collision)
+diff --git a/Assets/Scripts/Enemy.cs b/Assets/Scripts/Enemy.cs
+index 7c396f6..a83c0f5 100644
+--- a/Assets/Scripts/Enemy.cs
++++ b/Assets/Scripts/Enemy.cs
+@@ -1,5 +1,6 @@
+ using UnityEngine;
+ 
++//Комментарии убираемю
+ public class Enemy : MonoBehaviour
+ {
+     [SerializeField] private Transform _player;
+@@ -14,6 +15,7 @@ public class Enemy : MonoBehaviour
+         //playerTransform = FindObjectOfType<Player>().transform;
+     }
+ 
++    //Метод нигде не вызывается, убрать его
+     public void Init(Transform playerTransform)
+     {
+         _player = playerTransform;
+diff --git a/Assets/Scripts/EnemyHealth.cs b/Assets/Scripts/EnemyHealth.cs
+index 4a24920..b32c098 100644
+--- a/Assets/Scripts/EnemyHealth.cs
++++ b/Assets/Scripts/EnemyHealth.cs
+@@ -2,6 +2,7 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим. 
+ public class EnemyHealth : MonoBehaviour, IHaveHealth
+ {
+     [SerializeField] private Enemy _enemy;
+diff --git a/Assets/Scripts/FollowTarget.cs b/Assets/Scripts/FollowTarget.cs
+index 5001846..ddc69c1 100644
+--- a/Assets/Scripts/FollowTarget.cs
++++ b/Assets/Scripts/FollowTarget.cs
+@@ -2,9 +2,14 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим.
+ public class FollowTarget : MonoBehaviour
+ {
+     [SerializeField] private Transform _target;
++    
++    //private void Update() =>
++    //transform.position = _target.position;
++    //Если одна строчка в фигурных скобках, можно так написать покрасивше
+     private void Update()
+     {
+         transform.position = _target.position;
+diff --git a/Assets/Scripts/IHaveHealth.cs b/Assets/Scripts/IHaveHealth.cs
+index 04f4977..3fb2613 100644
+--- a/Assets/Scripts/IHaveHealth.cs
++++ b/Assets/Scripts/IHaveHealth.cs
+@@ -2,6 +2,7 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим
+ public interface IHaveHealth
+ {
+     void TakeDamage(int damageValue);
+diff --git a/Assets/Scripts/IPickup.cs b/Assets/Scripts/IPickup.cs
+index c120971..87f0f73 100644
+--- a/Assets/Scripts/IPickup.cs
++++ b/Assets/Scripts/IPickup.cs
+@@ -2,6 +2,7 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим.
+ public interface IPickup
+ {
+     void Pick(Pickuper pickup);
+diff --git a/Assets/Scripts/LootHeal.cs b/Assets/Scripts/LootHeal.cs
+index 986bc7a..a57c7a1 100644
+--- a/Assets/Scripts/LootHeal.cs
++++ b/Assets/Scripts/LootHeal.cs
+@@ -2,8 +2,11 @@ using UnityEngine;
+ 
+ public class LootHeal : MonoBehaviour, IPickup
+ {
++    //Не выставляй значение, если в инспекторе уже сериализуется поле. Нет смысла, только запутывает
+     [SerializeField] private int healthValue = 1;
+ 
++    //переменную назови не pickup, а pickuper. Вводит в заблуждение
++    //Так же лучше использовать TryGetComponent
+     public void Pick(Pickuper pickup)
+     {
+         PlayerHealth playerHealth = pickup.transform.GetComponent<PlayerHealth>();
+diff --git a/Assets/Scripts/MakeDamageOnCollision.cs b/Assets/Scripts/MakeDamageOnCollision.cs
+index 7d48875..90fd048 100644
+--- a/Assets/Scripts/MakeDamageOnCollision.cs
++++ b/Assets/Scripts/MakeDamageOnCollision.cs
+@@ -2,13 +2,16 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим, отступы контролируем
+ public class MakeDamageOnCollision : MonoBehaviour
+ {
++    //Не выставляй значение, если в инспекторе уже сериализуется поле. Нет смысла, только запутывает
+     [SerializeField] private int damageValue = 10;
+     private void OnCollisionEnter2D(Collision2D collision)
+     {
+         IHaveHealth objectHealth = collision.transform.GetComponent<IHaveHealth>();
+ 
++        //Проверка не нужна, тк коллизия и так происходит только с объектами, на которые риджидбоди навешен
+         if (collision.rigidbody)
+         { 
+                 objectHealth.TakeDamage(damageValue);
+diff --git a/Assets/Scripts/MoveControl.cs b/Assets/Scripts/MoveControl.cs
+index 606e584..00e8bae 100644
+--- a/Assets/Scripts/MoveControl.cs
++++ b/Assets/Scripts/MoveControl.cs
+@@ -1,5 +1,6 @@
+ using UnityEngine;
+ 
++//Почисти пробелы, соблюдай всегда консистентность в этом смысле. Комментарии тоже
+ public class MoveControl : MonoBehaviour
+ {
+     private static readonly string idle = "player_idle";
+@@ -53,6 +54,7 @@ public class MoveControl : MonoBehaviour
+         _sprite.flipX = direction.x < 0f;
+     }
+ 
++    //Публичный метод, который из вне никто не вызывает, сделать приватным
+     public void Jump()
+     { 
+         if (_isGrounded)
+diff --git a/Assets/Scripts/Patrol.cs b/Assets/Scripts/Patrol.cs
+index a44db6c..c7df1b5 100644
+--- a/Assets/Scripts/Patrol.cs
++++ b/Assets/Scripts/Patrol.cs
+@@ -1,7 +1,7 @@
+ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+-
++//Юзинги чистим.
+ 
+ public enum Directon
+ {
+@@ -10,6 +10,7 @@ public enum Directon
+ }
+ public class Patrol : MonoBehaviour
+ {
++    //Тут пробелы вообще не нужны, пусть подряд все [SerializeField] идут, иначе просто класс распухает
+     [SerializeField] private Transform leftTarget;
+     [SerializeField] private Transform rightTarget;
+ 
+@@ -33,6 +34,7 @@ public class Patrol : MonoBehaviour
+     {
+         if (_isStopped) return;
+ 
++        //Вынести в один метод с разными параметрами всё, что под if/else, тк явный дубляж кода
+         if (_currentDirecton == Directon.Left)
+         {
+             transform.position -= new Vector3(_speed * Time.deltaTime, 0f, 0f);
+@@ -64,11 +66,13 @@ public class Patrol : MonoBehaviour
+         }
+     }
+ 
++    //Название непонятное, лучше что-то вроде SetMoveStatus на крайняк
+     private void ContinueGo()
+     {
+         _isStopped = false;
+     }
+ 
++    //Метод нигде не вызывается, убрать
+     private void Move()
+     {
+         Transform target = leftTarget;
+diff --git a/Assets/Scripts/PatrolCoroutine.cs b/Assets/Scripts/PatrolCoroutine.cs
+index 5bc3b70..0346317 100644
+--- a/Assets/Scripts/PatrolCoroutine.cs
++++ b/Assets/Scripts/PatrolCoroutine.cs
+@@ -3,6 +3,9 @@ using System.Collections.Generic;
+ using UnityEngine;
+ using static UnityEngine.GraphicsBuffer;
+ 
++//Юзинги чистим, комментарии не оставляем.
++
++//Никакая это не корутина, подумай лучше над названием. 
+ public class PatrolCoroutine : MonoBehaviour
+ {
+     [SerializeField] private Transform leftTarget;
+diff --git a/Assets/Scripts/Pickuper.cs b/Assets/Scripts/Pickuper.cs
+index 3043251..e6b4dc0 100644
+--- a/Assets/Scripts/Pickuper.cs
++++ b/Assets/Scripts/Pickuper.cs
+@@ -2,6 +2,7 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим
+ public class Pickuper : MonoBehaviour
+ {
+     private void OnTriggerEnter2D(Collider2D collision)
+diff --git a/Assets/Scripts/Player/Player.cs b/Assets/Scripts/Player/Player.cs
+index 2515def..5ba4742 100644
+--- a/Assets/Scripts/Player/Player.cs
++++ b/Assets/Scripts/Player/Player.cs
+@@ -2,6 +2,8 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Не забываем чистить юзинги. Ну и в данном случае очевидно, что класс не нужен, раз в нём ничего нет. Только как маркер.
++//Но проверку на то, что игрок это или нет можно и по другим компонентам
+ public class Player : MonoBehaviour
+ {
+     
+diff --git a/Assets/Scripts/Player/PlayerHealth.cs b/Assets/Scripts/Player/PlayerHealth.cs
+index 08203f0..922143f 100644
+--- a/Assets/Scripts/Player/PlayerHealth.cs
++++ b/Assets/Scripts/Player/PlayerHealth.cs
+@@ -2,6 +2,10 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++//Юзинги чистим. Комментарии тоже. Публичные методы должны писаться выше приватных.
++//Вообще иерархия следующая: сначала юнитевские колбэки: старт, апдейт, дестрой и тд, потом публичные методы, потом приватные
++//Если публичные методы выше, то это мы таким образом обозначаем по сути "ручки", за которые мы дёргаем "класс". Приватные методы 
++//Всю подкапотную логику оставляют у себя
+ public class PlayerHealth : MonoBehaviour, IHaveHealth
+ {
+     [SerializeField] private int _health;
+@@ -30,6 +34,7 @@ public class PlayerHealth : MonoBehaviour, IHaveHealth
+                 Rip();
+             }
+             invulnerable = true;
++            //nameof используй
+             Invoke("StopInvulnerable", 1f);
+         }
+         int newHealth = _health;
+diff --git a/Assets/Scripts/Score.cs b/Assets/Scripts/Score.cs
+index c2711b5..a8143a7 100644
+--- a/Assets/Scripts/Score.cs
++++ b/Assets/Scripts/Score.cs
+@@ -3,12 +3,14 @@ using System.Collections.Generic;
+ using TMPro;
+ using UnityEngine;
+ 
++//Юзинги чистим, комментарии не оставляем
+ public class Score : MonoBehaviour
+ {
+     [SerializeField] private int coins;
+     //[SerializeField] private TextMeshPro coinsText;
+     [SerializeField] private TextMeshProUGUI coinsText;
+ 
++    //Свойство нигде не используется, убрать
+     public int Coins { get; private set; }
+ 
+     public void AddOne()
+diff --git a/Assets/Scripts/TakeDamageOnCollision.cs b/Assets/Scripts/TakeDamageOnCollision.cs
+index bc2b77c..39de336 100644
+--- a/Assets/Scripts/TakeDamageOnCollision.cs
++++ b/Assets/Scripts/TakeDamageOnCollision.cs
+@@ -2,12 +2,15 @@ using System.Collections;
+ using System.Collections.Generic;
+ using UnityEngine;
+ 
++
++//Юзинги чистим
+ public class TakeDamageOnCollision : MonoBehaviour
+ {
+     [SerializeField] private EnemyHealth enemyHealth;
+ 
+     private void OnCollisionEnter2D(Collision2D collision)
+     {
++        //Проверку на rigidbody не надо, тк у тебя коллизии только с rigidbody и происходят. Использовать TryGetComponent
+         if (collision.rigidbody)
+         {
+             if (collision.rigidbody.GetComponent<Player>())
+diff --git a/Assets/Scripts/UI/HealthBar.cs b/Assets/Scripts/UI/HealthBar.cs
+index de9addf..c0cdf8f 100644
+--- a/Assets/Scripts/UI/HealthBar.cs
++++ b/Assets/Scripts/UI/HealthBar.cs
+@@ -3,6 +3,7 @@ using System.Collections.Generic;
+ using UnityEngine;
+ using UnityEngine.UI;
+ 
++//Чистим отступы, юзинги, расстояния между методами и фигурными скобками. Это надо выдрочить до автоматизма
+ public class HealthBar : MonoBehaviour
+ {
+     [SerializeField] private Slider _slider;
+@@ -26,6 +27,8 @@ public class HealthBar : MonoBehaviour
+     
+     public void SetHealthMoveTowards( int oldHealth, int newHealth)
+     {
++        //Явно кастить во флоат не требуется здесь, шарпы сами это сделают, тк ты явно приравниваешь штуки к переменным типа флоат
++        //За неймингом тоже следить, непонятно что за a/b
+         float a = (float) oldHealth;
+         float b = (float) newHealth;
+ 
+diff --git a/Assets/Scripts/UI/MainMenu.cs b/Assets/Scripts/UI/MainMenu.cs
+index 7f8507d..05f0d94 100644
+--- a/Assets/Scripts/UI/MainMenu.cs
++++ b/Assets/Scripts/UI/MainMenu.cs
+@@ -3,6 +3,7 @@ using System.Collections.Generic;
+ using UnityEngine;
+ using UnityEngine.SceneManagement;
+ 
++//Юзинги чистим
+ public class MainMenu : MonoBehaviour
+ {
+     public void StartGame()
+@@ -12,7 +13,7 @@ public class MainMenu : MonoBehaviour
+ 
+     public void ExitGame()
+     {
+-        Debug.Log("���� ���������");
++        Debug.Log("���� ���������");
+         Application.Quit();
+     }
+ }

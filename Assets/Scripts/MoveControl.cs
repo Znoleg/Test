@@ -1,5 +1,6 @@
 using UnityEngine;
 
+//Почисти пробелы, соблюдай всегда консистентность в этом смысле. Комментарии тоже
 public class MoveControl : MonoBehaviour
 {
     private static readonly string idle = "player_idle";
@@ -53,6 +54,7 @@ public class MoveControl : MonoBehaviour
         _sprite.flipX = direction.x < 0f;
     }
 
+    //Публичный метод, который из вне никто не вызывает, сделать приватным
     public void Jump()
     { 
         if (_isGrounded)

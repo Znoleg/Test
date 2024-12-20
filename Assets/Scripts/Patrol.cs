@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//Юзинги чистим.
 
 public enum Directon
 {
@@ -10,6 +10,7 @@ public enum Directon
 }
 public class Patrol : MonoBehaviour
 {
+    //Тут пробелы вообще не нужны, пусть подряд все [SerializeField] идут, иначе просто класс распухает
     [SerializeField] private Transform leftTarget;
     [SerializeField] private Transform rightTarget;
 
@@ -33,6 +34,7 @@ public class Patrol : MonoBehaviour
     {
         if (_isStopped) return;
 
+        //Вынести в один метод с разными параметрами всё, что под if/else, тк явный дубляж кода
         if (_currentDirecton == Directon.Left)
         {
             transform.position -= new Vector3(_speed * Time.deltaTime, 0f, 0f);
@@ -64,11 +66,13 @@ public class Patrol : MonoBehaviour
         }
     }
 
+    //Название непонятное, лучше что-то вроде SetMoveStatus на крайняк
     private void ContinueGo()
     {
         _isStopped = false;
     }
 
+    //Метод нигде не вызывается, убрать
     private void Move()
     {
         Transform target = leftTarget;

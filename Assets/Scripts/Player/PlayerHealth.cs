@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Юзинги чистим. Комментарии тоже. Публичные методы должны писаться выше приватных.
+//Вообще иерархия следующая: сначала юнитевские колбэки: старт, апдейт, дестрой и тд, потом публичные методы, потом приватные
+//Если публичные методы выше, то это мы таким образом обозначаем по сути "ручки", за которые мы дёргаем "класс". Приватные методы 
+//Всю подкапотную логику оставляют у себя
 public class PlayerHealth : MonoBehaviour, IHaveHealth
 {
     [SerializeField] private int _health;
@@ -30,6 +34,7 @@ public class PlayerHealth : MonoBehaviour, IHaveHealth
                 Rip();
             }
             invulnerable = true;
+            //nameof используй
             Invoke("StopInvulnerable", 1f);
         }
         int newHealth = _health;

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Юзинги чистим. 
 public class EnemyHealth : MonoBehaviour, IHaveHealth
 {
     [SerializeField] private Enemy _enemy;

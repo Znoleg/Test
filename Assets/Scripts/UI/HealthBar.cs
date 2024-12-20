@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Чистим отступы, юзинги, расстояния между методами и фигурными скобками. Это надо выдрочить до автоматизма
 public class HealthBar : MonoBehaviour
 {
     [SerializeField] private Slider _slider;
@@ -26,6 +27,8 @@ public class HealthBar : MonoBehaviour
     
     public void SetHealthMoveTowards( int oldHealth, int newHealth)
     {
+        //Явно кастить во флоат не требуется здесь, шарпы сами это сделают, тк ты явно приравниваешь штуки к переменным типа флоат
+        //За неймингом тоже следить, непонятно что за a/b
         float a = (float) oldHealth;
         float b = (float) newHealth;
 
